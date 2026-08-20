@@ -1,0 +1,23 @@
+/gutenberg-gpt/
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+.env
+!.env.example
+
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+/artifacts/**
+!/artifacts/**/
+!/artifacts/**/.gitkeep
+
+.DS_Store
+.idea/
+.vscode/

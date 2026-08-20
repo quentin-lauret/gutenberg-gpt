@@ -1,0 +1,21 @@
+{
+  "model": {
+    "context_length": 128,
+    "n_embed": 192,
+    "n_layer": 12,
+    "n_head": 12,
+    "dropout_prob": 0.0
+  },
+  "training": {
+    "max_iters": 100000,
+    "eval_interval": 1000,
+    "eval_iters": 50,
+    "batch_size": 16,
+    "learning_rate": 3e-4,
+    "train_split": 0.9
+  },
+  "generation": {
+    "prompt": "Rappelez vous, ",
+    "max_new_tokens": 100
+  }
+}
