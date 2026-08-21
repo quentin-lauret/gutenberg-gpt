@@ -54,21 +54,26 @@
     <!-- stat chips -->
     <g font-size="13" font-weight="600">
       <g transform="translate(64,222)">
+        <rect width="126" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
+        <circle cx="18" cy="16" r="4" fill="#FF8A3D"/>
+        <text x="31" y="21" fill="#FFFFFF" opacity="0.92">11.7M params</text>
+      </g>
+      <g transform="translate(196,222)">
         <rect width="106" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
         <circle cx="18" cy="16" r="4" fill="#FFD166"/>
         <text x="31" y="21" fill="#FFFFFF" opacity="0.92">12 layers</text>
       </g>
-      <g transform="translate(178,222)">
+      <g transform="translate(308,222)">
         <rect width="106" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
         <circle cx="18" cy="16" r="4" fill="#FF6FB5"/>
         <text x="31" y="21" fill="#FFFFFF" opacity="0.92">12 heads</text>
       </g>
-      <g transform="translate(292,222)">
+      <g transform="translate(420,222)">
         <rect width="96" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
         <circle cx="18" cy="16" r="4" fill="#5EEAD4"/>
         <text x="31" y="21" fill="#FFFFFF" opacity="0.92">192 dim</text>
       </g>
-      <g transform="translate(396,222)">
+      <g transform="translate(522,222)">
         <rect width="132" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
         <circle cx="18" cy="16" r="4" fill="#A78BFA"/>
         <text x="31" y="21" fill="#FFFFFF" opacity="0.92">16k BPE vocab</text>
