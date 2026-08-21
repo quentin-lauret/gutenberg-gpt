@@ -24,7 +24,7 @@ class GutenbergTokenizer:
 
     def encode(self, sequences: str) -> list[int]:
         tokens = self.tokenizer.encode(sequences).ids
-        tokens.append(self.EOT)
+        #tokens.append(self.EOT)
         return tokens
 
     def decode(self, ids: list[int]) -> str:
