@@ -34,7 +34,8 @@ sentence = """A force d'aller en avant, il parvint au point où le brouillard de
 
 idx = torch.tensor([tokenizer.encode(sentence)], dtype=torch.long, device=device)
 
+print("Parameters :", sum(p.numel() for p in model.parameters()))
 
-text = tokenizer.decode(model.generate(idx, 50000, EOT=tokenizer.EOT, temperature=1, top_k=10)[0].tolist())
+text = tokenizer.decode(model.generate(idx, 100, EOT=tokenizer.EOT, temperature=1, top_k=10)[0].tolist())
 with open(ARTIFACTS_DIRECTORY/"output.txt", "w") as file:
     file.write(text)

@@ -135,10 +135,10 @@ class LanguageModel(nn.Module):
         return logits, loss
 
     @torch.no_grad()
-    def generate(self, idx, max_new_tokens, EOT, top_k=10, temperature=1):
+    def generate(self, idx, max_new_tokens, EOT=None, top_k=10, temperature=1):
         self.eval()
         i = 0
-        while i < max_new_tokens and idx[-1, -1] != EOT:
+        while i < max_new_tokens and (EOT is None or idx[-1, -1] != EOT):
             i += 1
             
             idx_cropped = idx[:, -self.context_length :]
@@ -158,5 +158,5 @@ class LanguageModel(nn.Module):
             )
 
             idx = torch.cat((idx, idx_next), dim=1)  # (B, T+1)
-            print(f"Token number {i} : {idx[-1, -1]}")
+            #print(f"Token number {i} : {idx[-1, -1]}")
         return idx
