@@ -14,10 +14,12 @@ __pycache__/
 /data/**
 !/data/**/
 !/data/**/.gitkeep
+!/data/books_clean/**
 /artifacts/**
 !/artifacts/**/
 !/artifacts/**/.gitkeep
-
+!/artifacts/gutenberg-fr-tokenizer.json
+clean_books.py
 .DS_Store
 .idea/
 .vscode/
