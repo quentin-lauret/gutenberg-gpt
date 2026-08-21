@@ -15,7 +15,8 @@ I built this to stop treating attention as a black box. Every piece of the model
 ├── config.json                    model and training hyperparameters
 ├── .env.example                   optional path overrides
 ├── requirements.txt
-├── artifacts/                     tokenizer and checkpoints land here
+├── artifacts/
+│   └── gutenberg-fr-tokenizer.json   the trained tokenizer
 ├── data/
 │   ├── books_clean/               the corpus, one plain-text book per file
 │   └── bin/                       tokenized train.bin / val.bin
@@ -28,15 +29,15 @@ I built this to stop treating attention as a black box. Every piece of the model
     └── paths.py                   resolves every path, honours .env
 ```
 
-`data/` and `artifacts/` are gitignored, so a fresh clone gives you the code and nothing else. You bring the books, the rest gets built.
+The corpus and the trained tokenizer are committed, so a clone gives you everything you need to start training. The two things you build yourself are the tokenized `.bin` files and the checkpoint, both gitignored. Fair warning: the books alone are around 750 MB, so the clone is not a quick one.
 
 ## How it works
 
-**Tokenizer.** A byte-level BPE with a vocabulary of 16384 and a single special token, `<|endoftext|>`, appended to the end of every encoded document. Byte-level matters more than it sounds for French: accented characters, ligatures and the old typography scattered through Gutenberg texts never produce an unknown token, they just cost a few extra bytes. Training runs on a random 5% sample of the training files, which is plenty for BPE and a lot faster than reading 700 MB.
+**Tokenizer.** A byte-level BPE with a vocabulary of 16384 and a single special token, `<|endoftext|>`. `encode` returns plain token ids, and `train.py` is what appends the special token, once per book, while it builds the `.bin` files. Byte-level matters more than it sounds for French: accented characters, ligatures and the old typography scattered through Gutenberg texts never produce an unknown token, they just cost a few extra bytes. Training runs on a random 5% sample of the training files, which is plenty for BPE and a lot faster than reading the whole 750 MB.
 
 **Data.** Books get tokenized once into two flat `uint16` files, `train.bin` and `val.bin`. Training reads them back with `np.memmap` and slices random windows out of them, so nothing large ever sits in memory and the split stays at the book level rather than the sentence level.
 
-**Model.** Standard GPT-style stack: token embeddings plus learned position embeddings, then N pre-norm blocks, each one causal self-attention followed by a feed-forward layer, both wrapped in residual connections. The causal mask is a lower-triangular buffer registered on each head, so a token can only ever attend to what came before it. Sampling uses temperature and top-k filtering, and crops the context window to the last `context_length` tokens on every step.
+**Model.** Standard GPT-style stack: token embeddings plus learned position embeddings, then N pre-norm blocks, each one causal self-attention followed by a feed-forward layer, both wrapped in residual connections. The causal mask is a lower-triangular buffer registered on each head, so a token can only ever attend to what came before it. Sampling uses temperature and top-k filtering, crops the context window to the last `context_length` tokens on every step, and can stop early when it draws the end-of-text token.
 
 ## Setup
 
@@ -53,17 +54,19 @@ Built and tested on Python 3.14. Training picks up CUDA automatically when it's 
 
 ## The corpus
 
-The books are not in the repo. Drop plain `.txt` files into `data/books_clean/`, one book per file, with the Project Gutenberg header and footer stripped out. Mine is roughly 1900 French novels, around 750 MB of text.
+`data/books_clean/` holds 1880 French novels, one plain `.txt` file per book, roughly 750 MB of text with the Project Gutenberg header and footer already stripped out. I downloaded and cleaned them with my [Project Gutenberg Reader](https://github.com/quentin-lauret/project-gutenberg-reader).
 
-If you keep your corpus somewhere else, point `DATA_DIRECTORY` at it in a `.env` file rather than moving anything around. Same goes for every other path in the project, see `.env.example`.
+If you'd rather train on your own texts, leave the folder alone and point `DATA_DIRECTORY` at yours in a `.env` file. Same goes for every other path in the project, see `.env.example`.
 
 ## Train the tokenizer
+
+`artifacts/gutenberg-fr-tokenizer.json` ships with the repo, so you only need this step if you change the vocabulary or switch to a different corpus.
 
 ```bash
 python src/gutenberg-gpt/gutenberg_tokenizer.py
 ```
 
-This writes `artifacts/gutenberg-fr-tokenizer.json`. Do it before anything else, because both the training script and the inference script load it on import.
+Both the training script and the inference script load the tokenizer on import, so the file has to be there before you run either one. If you do retrain it, delete `data/bin/train.bin` and `data/bin/val.bin` by hand, otherwise training keeps reading token ids that no longer mean anything.
 
 ## Train the model
 
@@ -71,7 +74,7 @@ This writes `artifacts/gutenberg-fr-tokenizer.json`. Do it before anything else,
 python src/gutenberg-gpt/train.py
 ```
 
-The first run tokenizes every book into `data/bin/train.bin` and `data/bin/val.bin`. That happens once, and the script skips it if the files already exist, so delete them by hand if you ever retrain the tokenizer. Then it trains, printing train and validation loss every `eval_interval` steps and saving a checkpoint whenever validation loss improves. It also prints a short sample at each save, which is the fastest way to see whether the thing is actually learning French or just learning where the spaces go.
+The first run tokenizes every book into `data/bin/train.bin` and `data/bin/val.bin`. That happens once, and the script skips it if the files already exist. Then it trains, printing train and validation loss every `eval_interval` steps and saving a checkpoint whenever validation loss improves. It also prints a short sample at each save, which is the fastest way to see whether the thing is actually learning French or just learning where the spaces go.
 
 Checkpoints store the architecture next to the weights, so a saved model stays loadable even if you change `config.json` afterwards.
 
@@ -81,7 +84,7 @@ Checkpoints store the architecture next to the weights, so a saved model stays l
 python src/gutenberg-gpt/inference.py
 ```
 
-The prompt lives in the `sentence` variable near the bottom of `inference.py`. Change it there.
+This loads the checkpoint, prints the parameter count and writes the continuation to `artifacts/output.txt`. The prompt lives in the `sentence` variable near the bottom of `inference.py`, next to the sampling settings: temperature, top-k, and the end-of-text id that lets generation stop before `max_new_tokens` if the model decides the document is over.
 
 ## Configuration
 
@@ -107,8 +110,6 @@ Paths are separate, and all optional. Copy `.env.example` to `.env` if you want 
 
 ## Credits
 
-Andrej Karpathy's [Let's build GPT](https://www.youtube.com/watch?v=kCc8FmEb1nY) was a very helpful ressource to build this project.
+Andrej Karpathy's [Let's build GPT](https://www.youtube.com/watch?v=kCc8FmEb1nY) was a very helpful resource to build this project.
 
 The texts come from [Project Gutenberg](https://www.gutenberg.org/).
-
-The data was built using my [Project Gutenberg Reader](https://github.com/quentin-lauret/project-gutenberg-reader).
