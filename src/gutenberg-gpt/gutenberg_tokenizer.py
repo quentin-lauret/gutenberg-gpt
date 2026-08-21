@@ -2,6 +2,7 @@ import os
 from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders
 import random
 from paths import DATA_DIRECTORY, TOKENIZER_PATH
+from config import TRAINING_CONFIG
 
 
 class GutenbergTokenizer:
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     data_files = [
         f"{data_directory}/{file_name}" for file_name in os.listdir(data_directory)
     ]
-    n_train = int(len(data_files) * 0.9)
+    n_train = int(len(data_files) * TRAINING_CONFIG["train_split"])
     train_files = data_files[:n_train]
     tokenizer = tokenizer.train(
         random.sample(train_files, int(n_train * 0.05)), destination=destination
