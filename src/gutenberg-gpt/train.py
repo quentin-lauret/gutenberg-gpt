@@ -45,11 +45,12 @@ train_files = data_files[:n_train]
 val_files = data_files[n_train:]
 
 
-def build_bin(files, out_path):
+def build_bin(files, out_path, EOT):
     with open(out_path, "wb") as f_out:
         for path in tqdm(files):
             with open(path, encoding="utf-8") as f:
                 ids = tokenizer.encode(f.read())
+            ids.append(EOT)
             np.array(ids, dtype=np.uint16).tofile(f_out)
 
 
@@ -96,9 +97,9 @@ def get_batches(bin_path, batch_size=4, context_length=256):
 
 if __name__ == "__main__":
     if not os.path.exists(train_bin):
-        build_bin(train_files, train_bin)
+        build_bin(train_files, train_bin, EOT=tokenizer.EOT)
     if not os.path.exists(val_bin):
-        build_bin(val_files, val_bin)
+        build_bin(val_files, val_bin, EOT=tokenizer.EOT)
 
     model = LanguageModel(
         vocab_size,
