@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" font-family="Avenir Next, Avenir, Helvetica Neue, Segoe UI, sans-serif">
+  <defs>
+    <clipPath id="card"><rect x="0" y="0" width="1200" height="300" rx="24"/></clipPath>
+
+    <filter id="blob" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="72"/>
+    </filter>
+
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+
+    <linearGradient id="scrim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"    stop-color="#0B0620" stop-opacity="0.78"/>
+      <stop offset="0.45" stop-color="#0B0620" stop-opacity="0.42"/>
+      <stop offset="0.72" stop-color="#0B0620" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="hot" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD166"/>
+      <stop offset="1" stop-color="#FF8A3D"/>
+    </linearGradient>
+
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1200" height="300" fill="#1A1038"/>
+    <g filter="url(#blob)">
+      <circle cx="150"  cy="30"  r="230" fill="#7B5CFF"/>
+      <circle cx="1090" cy="290" r="265" fill="#FF3D9A"/>
+      <circle cx="800"  cy="-50" r="205" fill="#22D3EE" opacity="0.6"/>
+      <circle cx="440"  cy="345" r="200" fill="#FFB627" opacity="0.5"/>
+      <circle cx="640"  cy="150" r="150" fill="#5B21B6" opacity="0.55"/>
+    </g>
+    <rect width="1200" height="300" fill="url(#scrim)"/>
+    <rect width="1200" height="300" filter="url(#grain)" opacity="0.07"/>
+
+    <!-- left column -->
+    <text x="64" y="72" font-size="13" font-weight="700" letter-spacing="3.4" fill="#FFD166">
+      BUILT FROM SCRATCH IN PYTORCH
+    </text>
+    <text x="62" y="140" font-size="66" font-weight="800" letter-spacing="-1.6" fill="#FFFFFF">
+      gutenberg-gpt
+    </text>
+    <text x="64" y="176" font-size="19" font-weight="500" fill="#FFFFFF" opacity="0.82">
+      a small GPT that learned to write from French public-domain books
+    </text>
+
+    <!-- stat chips -->
+    <g font-size="13" font-weight="600">
+      <g transform="translate(64,222)">
+        <rect width="106" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
+        <circle cx="18" cy="16" r="4" fill="#FFD166"/>
+        <text x="31" y="21" fill="#FFFFFF" opacity="0.92">12 layers</text>
+      </g>
+      <g transform="translate(178,222)">
+        <rect width="106" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
+        <circle cx="18" cy="16" r="4" fill="#FF6FB5"/>
+        <text x="31" y="21" fill="#FFFFFF" opacity="0.92">12 heads</text>
+      </g>
+      <g transform="translate(292,222)">
+        <rect width="96" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
+        <circle cx="18" cy="16" r="4" fill="#5EEAD4"/>
+        <text x="31" y="21" fill="#FFFFFF" opacity="0.92">192 dim</text>
+      </g>
+      <g transform="translate(396,222)">
+        <rect width="132" height="32" rx="16" fill="#FFFFFF" opacity="0.13"/>
+        <circle cx="18" cy="16" r="4" fill="#A78BFA"/>
+        <text x="31" y="21" fill="#FFFFFF" opacity="0.92">16k BPE vocab</text>
+      </g>
+    </g>
+
+    <!-- right column: next-token prediction -->
+    <text x="660" y="70" font-size="11" font-weight="700" letter-spacing="2.6" fill="#FFFFFF" opacity="0.5">
+      CONTEXT
+    </text>
+
+    <g font-family="Iowan Old Style, Palatino, Georgia, serif" font-size="19" font-style="italic" fill="#FFFFFF">
+      <g transform="translate(660,88)">
+        <rect width="104" height="36" rx="12" fill="#FFFFFF" opacity="0.14"/>
+        <text x="52" y="24" text-anchor="middle">Rappelez</text>
+      </g>
+      <g transform="translate(774,88)">
+        <rect width="66" height="36" rx="12" fill="#FFFFFF" opacity="0.14"/>
+        <text x="33" y="24" text-anchor="middle">vous</text>
+      </g>
+      <g transform="translate(850,88)">
+        <rect width="34" height="36" rx="12" fill="#FFFFFF" opacity="0.14"/>
+        <text x="17" y="24" text-anchor="middle">,</text>
+      </g>
+      <g transform="translate(894,88)">
+        <rect width="47" height="36" rx="12" fill="#FFFFFF" opacity="0.14"/>
+        <text x="23" y="24" text-anchor="middle">le</text>
+      </g>
+      <g transform="translate(951,88)">
+        <rect width="62" height="36" rx="12" fill="#FFFFFF" opacity="0.14"/>
+        <text x="31" y="24" text-anchor="middle">soir</text>
+      </g>
+    </g>
+
+    <!-- attention arcs -->
+    <g fill="none" stroke-linecap="round" opacity="0.95">
+      <path d="M712,124 C712,150 800,142 800,168" stroke="#FFD166" stroke-width="2.4"/>
+      <path d="M807,124 C807,150 818,142 818,168" stroke="#FF6FB5" stroke-width="1.3"/>
+      <path d="M867,124 C867,150 836,142 836,168" stroke="#5EEAD4" stroke-width="1"/>
+      <path d="M917,124 C917,150 854,142 854,168" stroke="#A78BFA" stroke-width="2"/>
+      <path d="M982,124 C982,150 872,142 872,168" stroke="#FFD166" stroke-width="3.2"/>
+    </g>
+
+    <!-- predicted token -->
+    <g transform="translate(781,168)" filter="url(#glow)">
+      <rect width="110" height="46" rx="15" fill="url(#hot)"/>
+      <text x="55" y="31" text-anchor="middle" font-family="Iowan Old Style, Palatino, Georgia, serif"
+            font-size="22" font-style="italic" font-weight="600" fill="#2B1055">où</text>
+    </g>
+    <text x="836" y="238" font-size="11" font-weight="700" letter-spacing="2.6"
+          text-anchor="middle" fill="#FFD166" opacity="0.9">
+      NEXT TOKEN
+    </text>
+  </g>
+</svg>
