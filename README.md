@@ -24,7 +24,7 @@ I built this to stop treating attention as a black box. Every piece of the model
     ├── model.py                   the transformer
     ├── gutenberg_tokenizer.py     byte-level BPE tokenizer
     ├── train.py                   data prep and training loop
-    ├── inference.py               sampling from a checkpoint
+    ├── inference.py               interactive sampling from a checkpoint
     ├── config.py                  reads config.json
     └── paths.py                   resolves every path, honours .env
 ```
@@ -84,7 +84,17 @@ Checkpoints store the architecture next to the weights, so a saved model stays l
 python src/gutenberg-gpt/inference.py
 ```
 
-This loads the checkpoint, prints the parameter count and writes the continuation to `artifacts/output.txt`. The prompt lives in the `sentence` variable near the bottom of `inference.py`, next to the sampling settings: temperature, top-k, and the end-of-text id that lets generation stop before `max_new_tokens` if the model decides the document is over.
+This loads the checkpoint and drops you into a small interactive prompt. Type a sentence, press Enter, and the model writes the next 100 tokens right underneath. Each round starts again from everything on screen, your words and the model's, so you steer the story by adding a line whenever the continuation drifts. Enter sends, Ctrl-C or Ctrl-D quits.
+
+Generation can also stop short, when the model draws the end-of-text token and decides the document is over. Temperature and top-k sit in the `inference` function at the top of the file.
+
+Two flags, both optional:
+
+```bash
+python src/gutenberg-gpt/inference.py -nt 300 -o artifacts/output.txt
+```
+
+`-nt / --nbtokens` sets how many tokens each round generates, 100 by default. `-o / --output` saves the text, rewriting the file after every round with everything so far. Without it nothing is written to disk.
 
 ## Configuration
 
