@@ -1,13 +1,12 @@
-import torch
-from torch import nn
-from torch.nn import functional as F
 import os
+
 import numpy as np
-from tqdm import tqdm
+import torch
+from config import GENERATION_CONFIG, MODEL_CONFIG, TRAINING_CONFIG
 from gutenberg_tokenizer import GutenbergTokenizer
-from paths import TOKENIZER_PATH, BIN_DATA_DIRECTORY, DATA_DIRECTORY, MODEL_PATH
-from config import MODEL_CONFIG, TRAINING_CONFIG, GENERATION_CONFIG
 from model import LanguageModel
+from paths import BIN_DATA_DIRECTORY, DATA_DIRECTORY, MODEL_PATH, TOKENIZER_PATH
+from tqdm import tqdm
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -45,7 +44,23 @@ train_files = data_files[:n_train]
 val_files = data_files[n_train:]
 
 
-def build_bin(files, out_path, EOT):
+def build_bin(files: list[str], out_path: str, EOT: int) -> None:
+    """
+    Tokenize every book and write the ids to a flat uint16 file.
+
+    Called once per split. `EOT` is appended after each book so the model sees
+    where one text ends and the next begins, and the result is what
+    `get_batches` later memory-maps.
+
+    Parameters
+    ----------
+    files : list of str
+        Paths of the books that make up this split.
+    out_path : str
+        Path of the .bin file to write.
+    EOT : int
+        End-of-text id to append after each book.
+    """
     with open(out_path, "wb") as f_out:
         for path in tqdm(files):
             with open(path, encoding="utf-8") as f:
@@ -55,7 +70,29 @@ def build_bin(files, out_path, EOT):
 
 
 @torch.no_grad()
-def estimate_loss(train_files, val_files, eval_iters=200):
+def estimate_loss(
+    train_files: str, val_files: str, eval_iters: int = 200
+) -> dict[str, torch.Tensor]:
+    """
+    Average the loss over random batches of each split.
+
+    The model is put in eval mode for the duration so dropout does not add
+    noise to the numbers, then back in train mode.
+
+    Parameters
+    ----------
+    train_files : str
+        Path of the training .bin file, despite the name.
+    val_files : str
+        Path of the validation .bin file.
+    eval_iters : int, optional
+        Number of batches to average over, per split.
+
+    Returns
+    -------
+    dict of {str: torch.Tensor}
+        Mean loss under the keys "train" and "val".
+    """
     model.eval()
     loss_mean = {}
     for split in ("train", "val"):
@@ -75,7 +112,31 @@ def estimate_loss(train_files, val_files, eval_iters=200):
     return loss_mean
 
 
-def get_batches(bin_path, batch_size=4, context_length=256):
+def get_batches(
+    bin_path: str, batch_size: int = 4, context_length: int = 256
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Draw a batch of random windows from a .bin file.
+
+    The file is memory-mapped rather than read, so the corpus never has to fit
+    in RAM. Tensors are moved to `device`, through pinned memory on CUDA.
+
+    Parameters
+    ----------
+    bin_path : str
+        Path of the .bin file to sample from.
+    batch_size : int, optional
+        Number of windows to draw.
+    context_length : int, optional
+        Length of each window.
+
+    Returns
+    -------
+    x : torch.Tensor
+        Inputs of shape ``(batch_size, context_length)``.
+    y : torch.Tensor
+        Targets of the same shape, `x` shifted one token to the right.
+    """
     data = np.memmap(bin_path, dtype=np.uint16, mode="r")
     ix = torch.randint(len(data) - context_length - 1, (batch_size,))
     x = torch.stack(
@@ -119,7 +180,7 @@ if __name__ == "__main__":
     model.train()
     min_loss = float("+inf")
     for steps in range(max_iters):
-        xb, yb = xb, yb = get_batches(
+        xb, yb = get_batches(
             train_bin, batch_size=batch_size, context_length=context_length
         )
         if steps % eval_interval == 0:
