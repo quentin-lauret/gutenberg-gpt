@@ -15,10 +15,13 @@ I built this to stop treating attention as a black box. Every piece of the model
 ├── config.json                    model and training hyperparameters
 ├── .env.example                   optional path overrides
 ├── requirements.txt
+├── assets/                        the banner at the top of this page
 ├── artifacts/
-│   └── gutenberg-fr-tokenizer.json   the trained tokenizer
+│   ├── gutenberg-fr-tokenizer.json   the trained tokenizer
+│   └── gutenberg-gpt.pt           the checkpoint, written by train.py
 ├── data/
 │   ├── books_clean/               the corpus, one plain-text book per file
+│   ├── books/                     empty, where the raw books sat before cleaning
 │   └── bin/                       tokenized train.bin / val.bin
 └── src/gutenberg-gpt/
     ├── model.py                   the transformer
@@ -74,7 +77,7 @@ Both the training script and the inference script load the tokenizer on import, 
 python src/gutenberg-gpt/train.py
 ```
 
-The first run tokenizes every book into `data/bin/train.bin` and `data/bin/val.bin`. That happens once, and the script skips it if the files already exist. Then it trains, printing train and validation loss every `eval_interval` steps and saving a checkpoint whenever validation loss improves. It also prints a short sample at each save, which is the fastest way to see whether the thing is actually learning French or just learning where the spaces go.
+The first run tokenizes every book into `data/bin/train.bin` and `data/bin/val.bin`. That happens once, and the script skips it if the files already exist. Then it trains, printing train and validation loss every `eval_interval` steps and saving a checkpoint whenever validation loss improves. It also prints a short sample at each save, and one before the very first step, straight from the untrained model, which is the fastest way to see whether the thing is actually learning French or just learning where the spaces go.
 
 Checkpoints store the architecture next to the weights, so a saved model stays loadable even if you change `config.json` afterwards.
 
@@ -84,7 +87,7 @@ Checkpoints store the architecture next to the weights, so a saved model stays l
 python src/gutenberg-gpt/inference.py
 ```
 
-This loads the checkpoint and drops you into a small interactive prompt. Type a sentence, press Enter, and the model writes the next 100 tokens right underneath. Each round starts again from everything on screen, your words and the model's, so you steer the story by adding a line whenever the continuation drifts. Enter sends, Ctrl-C or Ctrl-D quits.
+This loads the checkpoint and drops you into a small interactive prompt. Type a sentence, press Enter, and the model writes the next 100 tokens right underneath. Each round starts again from everything on screen, your words and the model's, so you steer the story by adding a line whenever the continuation drifts. Enter sends, and an empty line quits, along with Ctrl-C and Ctrl-D. There is no way to ask for another round without typing something, so keep a word in reserve when you only want more text.
 
 Generation can also stop short, when the model draws the end-of-text token and decides the document is over. Temperature and top-k sit in the `inference` function at the top of the file.
 
@@ -116,7 +119,7 @@ Everything tunable sits in `config.json`.
 | `generation.prompt` | `"Rappelez vous, "` | prompt for the samples printed during training |
 | `generation.max_new_tokens` | 100 | length of those samples |
 
-Paths are separate, and all optional. Copy `.env.example` to `.env` if you want to override where the config, the corpus, the `.bin` files, the tokenizer or the checkpoint live.
+Paths are separate, and all optional. Copy `.env.example` to `.env` if you want to override where the config, the corpus, the `.bin` files, the tokenizer or the checkpoint live. A relative value there is resolved from the directory you launch the script in, not from the repo root, so use an absolute path unless you always start from the root.
 
 ## Credits
 
